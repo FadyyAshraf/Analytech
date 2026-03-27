@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}إشعارات السحب{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>إشعارات السحب</h1>
+        <div class="sub">متابعة التشغيلات التي عليها Recall</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'inventory_recall_create' %}">+ إشعار جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="بحث برقم الإشعار أو التشغيلة أو الصنف"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>رقم الإشعار</th>
+                <th>الصنف</th>
+                <th>التشغيلة</th>
+                <th>التاريخ</th>
+                <th>الخطورة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recall in recalls %}
+            <tr>
+                <td>{{ recall.recall_number }}</td>
+                <td>{{ recall.item.item_name }}</td>
+                <td>{{ recall.lot.lot_number }}</td>
+                <td>{{ recall.notice_date }}</td>
+                <td>{{ recall.get_risk_level_display }}</td>
+                <td>{{ recall.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">لا توجد إشعارات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div><h1>{{ page_title }}</h1></div>
+    <div class="quick-links">
+        <a href="{% url back_url_name %}">رجوع</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            {% for field in form %}
+            <div {% if field.name == 'notes' %}style="grid-column:1 / -1;"{% endif %}>
+                <label style="display:block; margin-bottom:6px;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color:red; margin-top:5px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if form.non_field_errors %}
+            <div style="color:red; margin-top:10px;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div style="margin-top:20px;">
+            <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+                حفظ
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

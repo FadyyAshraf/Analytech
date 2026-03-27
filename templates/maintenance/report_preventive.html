@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير الصيانة الوقائية{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>تقرير الصيانة الوقائية</h1>
+        <div class="sub">المستحق والمتأخر والطبيعي لكل جهاز</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالعميل أو الجهاز أو السيريال" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <select name="status" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+            <option value="">كل الحالات</option>
+            <option value="due" {% if status_filter == 'due' %}selected{% endif %}>مستحقة الآن</option>
+            <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>متأخرة</option>
+            <option value="normal" {% if status_filter == 'normal' %}selected{% endif %}>طبيعية</option>
+        </select>
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>العميل</th>
+                <th>الهاتف</th>
+                <th>الجهاز</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>تاريخ التركيب</th>
+                <th>آخر PM</th>
+                <th>آخر زيارة</th>
+                <th>الزيارة القادمة</th>
+                <th>الحالة</th>
+                <th>أيام التأخير</th>
+                <th>المهندس</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr
+                {% if row.state == 'متأخرة' %}style="background:#ffe5e5;"{% endif %}
+                {% if row.state == 'مستحقة الآن' %}style="background:#fff7db;"{% endif %}
+            >
+                <td>{{ row.customer_name }}</td>
+                <td>{{ row.customer_phone }}</td>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.device_model }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.installation_date|default:"-" }}</td>
+                <td>{{ row.last_visit_date|default:"-" }}</td>
+                <td>{{ row.latest_any_visit|default:"-" }}</td>
+                <td>{{ row.next_due_date|default:"-" }}</td>
+                <td>{{ row.state }}</td>
+                <td>{{ row.days_delay }}</td>
+                <td>{{ row.engineer_name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" style="padding:20px; text-align:center;">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

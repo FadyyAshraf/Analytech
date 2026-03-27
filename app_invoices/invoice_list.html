@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}الفواتير{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>الفواتير</h1>
+        <div class="sub">قائمة الفواتير والبحث والطباعة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'invoice_create' %}">فاتورة جديدة</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث برقم الفاتورة أو اسم العميل"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button
+            type="submit"
+            style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;"
+        >
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th style="padding:12px; border:1px solid #ddd;">رقم</th>
+                <th style="padding:12px; border:1px solid #ddd;">العميل</th>
+                <th style="padding:12px; border:1px solid #ddd;">التاريخ</th>
+                <th style="padding:12px; border:1px solid #ddd;">الإجمالي النهائي</th>
+                <th style="padding:12px; border:1px solid #ddd;">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr>
+                <td style="padding:12px; border:1px solid #ddd;">{{ invoice.id }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ invoice.customer_name }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ invoice.invoice_date }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ invoice.total_after_vat }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">
+                    <a href="{% url 'invoice_detail' invoice.id %}" style="margin-left:10px;">فتح</a>
+                    <a href="{% url 'invoice_print' invoice.id %}" target="_blank">طباعة</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center; border:1px solid #ddd;">
+                    لا توجد فواتير
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

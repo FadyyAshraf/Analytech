@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة المخزن{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>لوحة المخزن</h1>
+        <div class="sub">لوحة موحدة للأصناف والتشغيلات والحركات والتنبيهات</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'inventory_item_list' %}">الأصناف</a>
+        <a href="{% url 'inventory_lot_list' %}">التشغيلات</a>
+        <a href="{% url 'inventory_transaction_list' %}">الحركات</a>
+        <a href="{% url 'inventory_recall_list' %}">إشعارات السحب</a>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>عدد الأصناف</h3>
+        <div class="value">{{ total_items }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>أصناف أقل من الحد</h3>
+        <div class="value">{{ low_stock_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>تشغيلات قربت تنتهي</h3>
+        <div class="value">{{ expiring_lots_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إشعارات سحب مفتوحة</h3>
+        <div class="value">{{ open_recalls_count }}</div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر حركات المخزن</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>الصنف</th>
+                <th>التشغيلة</th>
+                <th>النوع</th>
+                <th>الكمية</th>
+                <th>المصدر</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in recent_transactions %}
+            <tr>
+                <td>{{ tx.transaction_date }}</td>
+                <td>{{ tx.item.item_name }}</td>
+                <td>{% if tx.lot %}{{ tx.lot.lot_number }}{% else %}-{% endif %}</td>
+                <td>{{ tx.get_transaction_type_display }}</td>
+                <td>{{ tx.quantity }}</td>
+                <td>{{ tx.source_name|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد حركات حديثة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

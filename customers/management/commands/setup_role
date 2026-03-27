@@ -1,0 +1,82 @@
+from django.core.management.base import BaseCommand
+from django.contrib.auth.models import Group, Permission
+
+
+class Command(BaseCommand):
+    help = "Create default user roles and permissions for Analytech ERP"
+
+    def handle(self, *args, **options):
+        def perms(*codenames):
+            return Permission.objects.filter(codename__in=codenames)
+
+        # امسح الجروبات القديمة لو موجودة بنفس الأسماء
+        group_names = [
+            'مدير النظام',
+            'المخزن',
+            'الفواتير',
+            'الصيانة',
+            'قراءة فقط',
+        ]
+
+        for name in group_names:
+            Group.objects.filter(name=name).delete()
+
+        # مدير النظام
+        admin_group = Group.objects.create(name='مدير النظام')
+        admin_group.permissions.set(Permission.objects.all())
+
+        # المخزن
+        inventory_group = Group.objects.create(name='المخزن')
+        inventory_group.permissions.set(
+            perms(
+                'view_inventoryitem', 'add_inventoryitem', 'change_inventoryitem',
+                'view_inventorylot', 'add_inventorylot', 'change_inventorylot',
+                'view_inventorytransaction', 'add_inventorytransaction',
+                'view_recallnotice', 'add_recallnotice', 'change_recallnotice',
+            )
+        )
+
+        # الفواتير
+        invoices_group = Group.objects.create(name='الفواتير')
+        invoices_group.permissions.set(
+            perms(
+                'view_invoice', 'add_invoice', 'change_invoice',
+                'view_invoiceitem', 'add_invoiceitem', 'change_invoiceitem',
+                'view_invoiceprintsettings', 'change_invoiceprintsettings',
+                'view_customer',
+                'view_inventoryitem',
+                'view_inventorylot',
+            )
+        )
+
+        # الصيانة
+        maintenance_group = Group.objects.create(name='الصيانة')
+        maintenance_group.permissions.set(
+            perms(
+                'view_maintenance', 'add_maintenance', 'change_maintenance',
+                'view_maintenanceitemusage', 'add_maintenanceitemusage', 'change_maintenanceitemusage',
+                'view_customer',
+                'view_device',
+                'view_inventoryitem',
+                'view_inventorylot',
+            )
+        )
+
+        # قراءة فقط
+        readonly_group = Group.objects.create(name='قراءة فقط')
+        readonly_group.permissions.set(
+            perms(
+                'view_customer',
+                'view_device',
+                'view_inventoryitem',
+                'view_inventorylot',
+                'view_inventorytransaction',
+                'view_recallnotice',
+                'view_invoice',
+                'view_invoiceitem',
+                'view_maintenance',
+                'view_maintenanceitemusage',
+            )
+        )
+
+        self.stdout.write(self.style.SUCCESS('تم إنشاء الصلاحيات والجروبات بنجاح.'))

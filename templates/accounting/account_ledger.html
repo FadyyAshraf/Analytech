@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}دفتر الأستاذ{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>دفتر الأستاذ</h1>
+        <div class="sub">عرض حركة أي حساب محاسبي</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'accounting_dashboard' %}">لوحة الحسابات</a>
+        <a href="{% url 'account_list' %}">شجرة الحسابات</a>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <form method="get" style="display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end;">
+        <div>
+            <label style="display:block; margin-bottom:6px;">اختر الحساب</label>
+            <select name="account" class="form-control">
+                <option value="">-- اختر --</option>
+                {% for row in accounts %}
+                    <option value="{{ row.id }}" {% if selected_account and selected_account.id == row.id %}selected{% endif %}>
+                        {{ row.code }} - {{ row.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit"
+                    style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;">
+                عرض
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if selected_account %}
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">بيانات الحساب</h2>
+    <div><strong>الحساب:</strong> {{ selected_account.code }} - {{ selected_account.name }}</div>
+    <div><strong>الرصيد الحالي:</strong> {{ balance }}</div>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">الحركة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>البيان</th>
+                <th>المرجع</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in lines %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.description }}</td>
+                <td>{{ row.reference|default:"-" }}</td>
+                <td>{{ row.debit }}</td>
+                <td>{{ row.credit }}</td>
+                <td>{{ row.balance }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد حركة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

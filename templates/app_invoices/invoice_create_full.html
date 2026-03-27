@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>{{ page_title }}</h1>
+        {% if invoice %}
+            <div class="sub">
+                الحالة: {{ invoice.get_status_display }}
+                {% if invoice.journal_entry %}
+                    | القيد: {{ invoice.journal_entry.id }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'invoice_list' %}">رجوع</a>
+        {% if invoice %}
+            <a href="{% url 'invoice_print' invoice.id %}" target="_blank">طباعة</a>
+            {% if invoice.status == 'draft' %}
+                <a href="{% url 'post_invoice' invoice.id %}">ترحيل</a>
+            {% endif %}
+            {% if invoice.status != 'cancelled' %}
+                <a href="{% url 'cancel_invoice' invoice.id %}">إلغاء</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="section">
+    <form method="post">
+        {% csrf_token %}
+
+        <h2 style="margin-top:0;">بيانات الفاتورة</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            {% for field in invoice_form %}
+            <div {% if field.name == 'notes' %}style="grid-column:1 / -1;"{% endif %}>
+                <label style="display:block; margin-bottom:6px; font-weight:bold;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <div style="color:#666; font-size:13px; margin-top:4px;">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                    <div style="color:red; margin-top:5px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if invoice_form.non_field_errors %}
+            <div style="color:red; margin-bottom:15px;">{{ invoice_form.non_field_errors }}</div>
+        {% endif %}
+
+        <h2>بنود الفاتورة</h2>
+
+        {{ formset.management_form }}
+
+        <table id="items-table" style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+                <tr style="background:#eef4f7;">
+                    <th style="padding:10px; border:1px solid #ddd;">الصنف</th>
+                    <th style="padding:10px; border:1px solid #ddd;">التشغيلة</th>
+                    <th style="padding:10px; border:1px solid #ddd;">الوصف</th>
+                    <th style="padding:10px; border:1px solid #ddd;">الكمية</th>
+                    <th style="padding:10px; border:1px solid #ddd;">السعر</th>
+                    <th style="padding:10px; border:1px solid #ddd;">حذف</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr class="item-row">
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.item }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.lot }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.description }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.quantity }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.price }}</td>
+                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">{{ form.DELETE }}</td>
+                </tr>
+                {% if form.errors %}
+                <tr>
+                    <td colspan="6" style="padding:8px; border:1px solid #ddd; color:red;">
+                        {{ form.errors }}
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if invoice and invoice.status != 'draft' %}
+            <div style="background:#fff3cd; color:#664d03; padding:12px; border-radius:8px; margin-bottom:15px;">
+                هذه الفاتورة ليست في حالة مسودة، لذلك التعديل غير متاح.
+            </div>
+        {% endif %}
+
+        {% if not invoice or invoice.status == 'draft' %}
+        <div style="margin-bottom:15px;">
+            <button type="button" id="add-row-btn"
+                    style="padding:10px 14px; background:#198754; color:white; border:none; border-radius:8px;">
+                + إضافة صنف جديد
+            </button>
+        </div>
+
+        <div>
+            <button type="submit"
+                    style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+                حفظ
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{% if not invoice or invoice.status == 'draft' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addBtn = document.getElementById('add-row-btn');
+    const tableBody = document.querySelector('#items-table tbody');
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+
+    if (!addBtn || !tableBody || !totalForms) return;
+
+    addBtn.addEventListener('click', function () {
+        const currentIndex = parseInt(totalForms.value, 10);
+        const firstRow = tableBody.querySelector('.item-row');
+        if (!firstRow) return;
+
+        const newRow = firstRow.cloneNode(true);
+
+        newRow.querySelectorAll('input, select, textarea').forEach(function (field) {
+            if (field.name) {
+                field.name = field.name.replace(/items-\d+-/g, `items-${currentIndex}-`);
+            }
+            if (field.id) {
+                field.id = field.id.replace(/id_items-\d+-/g, `id_items-${currentIndex}-`);
+            }
+
+            if (field.tagName === 'SELECT') {
+                field.selectedIndex = 0;
+            } else if (field.type === 'checkbox') {
+                field.checked = false;
+            } else {
+                field.value = '';
+            }
+        });
+
+        tableBody.appendChild(newRow);
+        totalForms.value = currentIndex + 1;
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

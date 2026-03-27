@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}السلف{% endblock %}
+{% block content %}
+<div class="topbar">
+    <div><h1>السلف</h1></div>
+    <div class="quick-links">
+        <a href="{% url 'advance_create' %}">+ إضافة</a>
+    </div>
+</div>
+<div class="section">
+    <table>
+        <thead>
+            <tr>
+                <th>الموظف</th>
+                <th>التاريخ</th>
+                <th>القيمة</th>
+                <th>المسدد</th>
+                <th>المتبقي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.employee.full_name }}</td>
+                <td>{{ row.advance_date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.settled_amount }}</td>
+                <td>{{ row.remaining_amount }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="padding:20px; text-align:center;">لا توجد بيانات</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

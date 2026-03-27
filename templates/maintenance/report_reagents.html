@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير أكواد المحاليل وقت الصيانة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>تقرير أكواد المحاليل وقت الصيانة</h1>
+        <div class="sub">المحاليل المشغلة / المفعلة على الأجهزة وقت الزيارة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالعميل أو الجهاز أو الكود أو المهندس" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="from_date" value="{{ from_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="to_date" value="{{ to_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>التاريخ</th>
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>Diluent</th>
+                <th>Lot</th>
+                <th>Lyse</th>
+                <th>Lot</th>
+                <th>Cleaner</th>
+                <th>Lot</th>
+                <th>المهندس</th>
+                <th>سجل الجهاز</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.visit_date }}</td>
+                <td>{{ row.customer_name }}</td>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.device_model }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.diluent_code }}</td>
+                <td>{{ row.diluent_lot }}</td>
+                <td>{{ row.lyse_code }}</td>
+                <td>{{ row.lyse_lot }}</td>
+                <td>{{ row.cleaner_code }}</td>
+                <td>{{ row.cleaner_lot }}</td>
+                <td>{{ row.engineer_name }}</td>
+                <td><a href="{% url 'device_history_detail' row.device_id %}">فتح</a></td>
+            </tr>
+            {% if row.reagents_notes %}
+            <tr>
+                <td colspan="13" style="background:#fafafa; padding:10px;">
+                    <strong>ملاحظات المحاليل:</strong> {{ row.reagents_notes }}
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="13" style="padding:20px; text-align:center;">لا توجد بيانات محاليل مسجلة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

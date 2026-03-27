@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة الصيانة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>لوحة الصيانة</h1>
+        <div class="sub">لوحة موحدة للطلبات والزيارات والخطط الوقائية والمهندسين</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_request_list' %}">طلبات الصيانة</a>
+        <a href="{% url 'maintenance_visit_list' %}">زيارات الصيانة</a>
+        <a href="{% url 'preventive_plan_list' %}">الخطط الوقائية</a>
+        <a href="{% url 'overdue_preventive_customers_report' %}">المتأخرون وقائيًا</a>
+        <a href="{% url 'completed_preventive_customers_report' %}">المنفذ لهم وقائيًا</a>
+        <a href="{% url 'engineer_performance_report' %}">أداء المهندسين</a>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>إجمالي الخطط الوقائية</h3>
+        <div class="value">{{ total_plans }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>زيارات متأخرة</h3>
+        <div class="value">{{ overdue_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>مستحقة الآن</h3>
+        <div class="value">{{ due_now_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>طلبات مفتوحة</h3>
+        <div class="value">{{ open_requests_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>بانتظار قطع غيار</h3>
+        <div class="value">{{ waiting_parts_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>زيارات وقائية منفذة</h3>
+        <div class="value">{{ completed_preventive_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>عدد المهندسين</h3>
+        <div class="value">{{ engineers_count }}</div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر زيارات الصيانة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>المهندس</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_visits %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.customer.name }}</td>
+                <td>{{ row.device.device_name }}</td>
+                <td>{{ row.get_visit_type_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.visit_date }}</td>
+                <td>{% if row.engineer %}{{ row.engineer.full_name }}{% else %}{{ row.engineer_name|default:"-" }}{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="padding:20px; text-align:center;">لا توجد زيارات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

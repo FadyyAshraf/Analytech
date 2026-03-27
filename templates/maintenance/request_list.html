@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}طلبات الصيانة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>طلبات الصيانة</h1>
+        <div class="sub">بلاغات الأعطال ومتابعتها</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_request_create' %}">+ طلب جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث بالعميل أو الجهاز أو السيريال أو وصف العطل"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>تاريخ البلاغ</th>
+                <th>الأولوية</th>
+                <th>الحالة</th>
+                <th>المبلغ</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.customer.name }}</td>
+                <td>{{ r.device.device_name }}</td>
+                <td>{{ r.request_date }}</td>
+                <td>{{ r.get_priority_display }}</td>
+                <td>{{ r.get_status_display }}</td>
+                <td>{{ r.reported_by|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'maintenance_request_edit' r.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد طلبات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

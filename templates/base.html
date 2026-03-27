@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Analytech ERP{% endblock %}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Tahoma, Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        .navbar {
+            background: #0f3d56;
+            color: white;
+            padding: 14px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .menu {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .menu > a,
+        .dropdown > a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .menu > a:hover,
+        .dropdown > a:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            min-width: 250px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .dropdown-content a {
+            display: block;
+            color: #23313a;
+            text-decoration: none;
+            padding: 11px 14px;
+            border-bottom: 1px solid #eef1f4;
+            background: white;
+            font-size: 14px;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f5f8fb;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .container {
+            padding: 20px 25px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            margin: 0;
+        }
+
+        .sub {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #eef4f7;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+
+        .form-control,
+        select,
+        textarea,
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .quick-links a {
+            display: inline-block;
+            background: #0f3d56;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .quick-links a:hover {
+            background: #0c2f42;
+        }
+
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .hub-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .hub-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #0f3d56;
+        }
+
+        .hub-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hub-card .links a {
+            display: inline-block;
+            margin-left: 8px;
+            margin-bottom: 8px;
+            color: #0f3d56;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .hub-card .links a:hover {
+            text-decoration: underline;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">Analytech ERP</div>
+
+    {% if user.is_authenticated %}
+    <div class="menu">
+        <a href="/">Dashboard</a>
+
+        {% if perms.customers.view_customer %}
+        <a href="/customers/">العملاء</a>
+        {% endif %}
+
+        {% if perms.app_employees.view_employee %}
+        <a href="/employees/">الموظفون</a>
+        {% endif %}
+
+        {% if perms.app_quotations.view_quotation or perms.app_sales.view_salesorder or perms.app_invoices.view_invoice or perms.app_employees.view_employeecommission %}
+        <div class="dropdown">
+            <a href="/reports/sales/">المبيعات ▾</a>
+            <div class="dropdown-content">
+                {% if perms.app_quotations.view_quotation %}
+                <a href="/quotations/">عروض الأسعار</a>
+                {% endif %}
+                {% if perms.app_sales.view_salesorder %}
+                <a href="/sales-orders/">طلبات البيع</a>
+                {% endif %}
+                {% if perms.app_invoices.view_invoice %}
+                <a href="/invoices/">الفواتير</a>
+                {% endif %}
+                {% if perms.app_sales.view_salesorder or perms.app_quotations.view_quotation or perms.app_invoices.view_invoice %}
+                <a href="/reports/sales/">لوحة المبيعات</a>
+                {% endif %}
+                {% if perms.app_employees.view_employeecommission %}
+                <a href="/reports/commissions/">العمولات</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if perms.app_maintenance.view_maintenancerequest or perms.app_maintenance.view_maintenancevisit or perms.app_maintenance.view_preventivemaintenanceplan %}
+        <div class="dropdown">
+            <a href="/maintenance/reports/">الصيانة ▾</a>
+            <div class="dropdown-content">
+                <a href="/maintenance/reports/">لوحة الصيانة</a>
+                {% if perms.app_maintenance.view_maintenancerequest %}
+                <a href="/maintenance/requests/">طلبات الصيانة</a>
+                {% endif %}
+                {% if perms.app_maintenance.view_maintenancevisit %}
+                <a href="/maintenance/visits/">زيارات الصيانة</a>
+                {% endif %}
+                {% if perms.app_maintenance.view_preventivemaintenanceplan %}
+                <a href="/maintenance/plans/">الخطط الوقائية</a>
+                {% endif %}
+                <a href="/maintenance/reports/overdue-preventive/">المتأخرون وقائيًا</a>
+                <a href="/maintenance/reports/completed-preventive/">المنفذ لهم وقائيًا</a>
+                <a href="/maintenance/reports/engineers/">أداء المهندسين</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if perms.app_inventory.view_inventoryitem or perms.app_inventory.view_inventorylot or perms.app_inventory.view_inventorytransaction or perms.app_inventory.view_recallnotice %}
+        <div class="dropdown">
+            <a href="/inventory/">المخزن ▾</a>
+            <div class="dropdown-content">
+                <a href="/inventory/">لوحة المخزن</a>
+                {% if perms.app_inventory.view_inventoryitem %}
+                <a href="/inventory/items/">الأصناف</a>
+                {% endif %}
+                {% if perms.app_inventory.view_inventorylot %}
+                <a href="/inventory/lots/">التشغيلات</a>
+                {% endif %}
+                {% if perms.app_inventory.view_inventorytransaction %}
+                <a href="/inventory/transactions/">حركات المخزن</a>
+                {% endif %}
+                {% if perms.app_inventory.add_inventorytransaction %}
+                <a href="/inventory/transactions/create/">حركة جديدة</a>
+                {% endif %}
+                {% if perms.app_inventory.view_recallnotice %}
+                <a href="/inventory/recalls/">إشعارات السحب</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if perms.accounting.view_account or perms.accounting.view_journalentry or perms.accounting.view_receiptvoucher or perms.accounting.view_paymentvoucher %}
+        <div class="dropdown">
+            <a href="/accounting/">الحسابات ▾</a>
+            <div class="dropdown-content">
+                <a href="/accounting/">لوحة الحسابات</a>
+                {% if perms.accounting.view_account %}
+                <a href="/accounting/accounts/">شجرة الحسابات</a>
+                <a href="/accounting/customer-statement/">كشف حساب العميل</a>
+                <a href="/accounting/ledger/">دفتر الأستاذ</a>
+                <a href="/accounting/trial-balance/">ميزان المراجعة</a>
+                <a href="/accounting/profit-loss/">الأرباح والخسائر</a>
+                {% endif %}
+                {% if perms.accounting.view_journalentry %}
+                <a href="/accounting/journal/">القيود اليومية</a>
+                {% endif %}
+                {% if perms.accounting.view_receiptvoucher %}
+                <a href="/accounting/receipts/">سندات القبض</a>
+                {% endif %}
+                {% if perms.accounting.view_paymentvoucher %}
+                <a href="/accounting/payments/">سندات الصرف</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.is_staff %}
+        <div class="dropdown">
+            <a href="/admin/">إدارة النظام ▾</a>
+            <div class="dropdown-content">
+                <a href="/admin/">لوحة الإدارة</a>
+                <a href="/admin/auth/user/">مستخدمي النظام</a>
+                <a href="/admin/auth/group/">مجموعات الصلاحيات</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="user-box">
+        <span>{{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">تسجيل خروج</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

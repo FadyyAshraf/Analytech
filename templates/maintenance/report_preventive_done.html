@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}العملاء المنفذ لهم الصيانة الوقائية{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>العملاء المنفذ لهم الصيانة الوقائية</h1>
+        <div class="sub">بيان كامل بالأجهزة التي تم تنفيذ PM لها</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالعميل أو الجهاز أو المهندس" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="from_date" value="{{ from_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="to_date" value="{{ to_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>العميل</th>
+                <th>الهاتف</th>
+                <th>الجهاز</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>تاريخ التركيب</th>
+                <th>تاريخ الزيارة</th>
+                <th>الموعد المستهدف</th>
+                <th>الحالة</th>
+                <th>المهندس</th>
+                <th>آخر زيارة</th>
+                <th>سجل الجهاز</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.customer_name }}</td>
+                <td>{{ row.customer_phone }}</td>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.device_model }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.installation_date|default:"-" }}</td>
+                <td>{{ row.visit_date }}</td>
+                <td>{{ row.planned_due_date|default:"-" }}</td>
+                <td>{{ row.status_text }}</td>
+                <td>{{ row.engineer_name }}</td>
+                <td>{{ row.latest_any_visit|default:"-" }}</td>
+                <td><a href="{% url 'device_history_detail' row.device_id %}">فتح</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" style="padding:20px; text-align:center;">لا توجد زيارات وقائية مطابقة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

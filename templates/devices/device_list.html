@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}الأجهزة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>الأجهزة المركبة</h1>
+        <div class="sub">قائمة الأجهزة المرتبطة بالعملاء داخل النظام</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'device_create' %}">+ جهاز جديد</a>
+        <a href="{% url 'customer_list' %}">العملاء</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث باسم الجهاز أو السيريال أو الموديل أو العميل"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button
+            type="submit"
+            style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اسم الجهاز</th>
+                <th>النوع</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>العميل</th>
+                <th>تاريخ التركيب</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td>{{ device.device_name }}</td>
+                <td>{{ device.get_device_type_display }}</td>
+                <td>{{ device.model|default:"-" }}</td>
+                <td>{{ device.serial_number }}</td>
+                <td>{{ device.customer.name }}</td>
+                <td>{{ device.installation_date|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'device_detail' device.id %}">فتح</a>
+                    |
+                    <a href="{% url 'device_edit' device.id %}">تعديل</a>
+                    |
+                    <a href="{% url 'customer_detail' device.customer.id %}">ملف العميل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="padding:20px; text-align:center;">لا توجد أجهزة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

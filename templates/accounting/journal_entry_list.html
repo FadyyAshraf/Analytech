@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}القيود اليومية{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>القيود اليومية</h1>
+        <div class="sub">القيود اليدوية والمرحلة من الفواتير والسندات</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'journal_entry_create' %}">+ قيد جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالبيان أو المرجع أو الحالة"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>التاريخ</th>
+                <th>البيان</th>
+                <th>المرجع</th>
+                <th>الحالة</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry.id }}</td>
+                <td>{{ entry.entry_date }}</td>
+                <td>{{ entry.description }}</td>
+                <td>{{ entry.reference|default:"-" }}</td>
+                <td>{{ entry.status }}</td>
+                <td>{{ entry.total_debit }}</td>
+                <td>{{ entry.total_credit }}</td>
+                <td>
+                    <a href="{% url 'journal_entry_detail' entry.id %}">فتح</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد قيود</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

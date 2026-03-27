@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>فاتورة {{ invoice.id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #222;
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .print-toolbar {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 5000;
+            display: flex !important;
+            gap: 8px;
+            flex-wrap: wrap;
+            direction: ltr;
+        }
+
+        .print-toolbar button,
+        .print-toolbar a {
+            padding: 10px 16px;
+            border: none;
+            background: #0b5d7a;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+
+        .print-toolbar a.alt {
+            background: #198754;
+        }
+
+        .print-toolbar a.mail {
+            background: #6f42c1;
+        }
+
+        .print-toolbar button.pdf-btn {
+            background: #dc3545;
+        }
+
+        .print-header,
+        .print-footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .print-header {
+            top: 0;
+        }
+
+        .print-footer {
+            bottom: 0;
+            border-top: 1px solid #0b5d7a;
+            padding: 6px 12px;
+            min-height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            font-size: 11px;
+            color: #444;
+            line-height: 1.25;
+        }
+
+        .header-banner {
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .header-banner img {
+            width: 100vw;
+            max-width: none;
+            display: block;
+            margin: 0;
+            padding: 0;
+            height: auto;
+            max-height: 78px;
+            object-fit: cover;
+        }
+
+        .footer-right {
+            width: 48%;
+            text-align: right;
+            direction: rtl;
+            white-space: pre-line;
+        }
+
+        .footer-left {
+            width: 48%;
+            text-align: left;
+            direction: ltr;
+            white-space: pre-line;
+        }
+
+        .page-content {
+            box-sizing: border-box;
+            padding-top: 95px;
+            padding-bottom: 62px;
+            padding-right: 20mm;
+            padding-left: 20mm;
+        }
+
+        .doc-title {
+            text-align: center;
+            margin: 6px 0 10px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .top-info {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .top-info td {
+            border: 1px solid #cfcfcf;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .top-info strong {
+            color: #0b5d7a;
+        }
+
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .items th,
+        .items td {
+            border: 1px solid #999;
+            padding: 7px 6px;
+            text-align: center;
+        }
+
+        .items th {
+            background: #eaf4f8;
+            color: #0b5d7a;
+            font-weight: bold;
+        }
+
+        .totals {
+            width: 42%;
+            margin-right: auto;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .totals td {
+            border: 1px solid #cfcfcf;
+            padding: 7px;
+        }
+
+        .totals .label {
+            background: #f7f7f7;
+            font-weight: bold;
+        }
+
+        .totals .final {
+            background: #eaf4f8;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .notes {
+            margin-top: 8px;
+            border: 1px solid #cfcfcf;
+            padding: 10px;
+            min-height: 38px;
+        }
+
+        .notes-title {
+            font-weight: bold;
+            color: #0b5d7a;
+            margin-bottom: 5px;
+        }
+
+        .signatures {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .sign-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .sign-line {
+            margin-top: 26px;
+            border-top: 1px solid #666;
+            padding-top: 6px;
+        }
+
+        @media print {
+            .print-toolbar {
+                display: none !important;
+            }
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+    <script>
+        function downloadPdfViaBrowser() {
+            window.print();
+        }
+    </script>
+</head>
+<body>
+
+<div class="print-toolbar">
+    <button onclick="window.print()">🖨️ طباعة</button>
+    <button class="pdf-btn" onclick="downloadPdfViaBrowser()">📄 تحميل PDF</button>
+    <a class="alt" target="_blank" href="https://wa.me/?text=فاتورة رقم {{ invoice.id }} - {{ invoice.customer_name }} - رابط الفاتورة: {{ request.build_absolute_uri|urlencode }}">واتساب</a>
+    <a class="mail" href="mailto:?subject=فاتورة رقم {{ invoice.id|urlencode }}&body=رابط الفاتورة:%0A{{ request.build_absolute_uri|urlencode }}">إيميل</a>
+</div>
+
+<div class="print-header">
+    {% if print_settings and print_settings.logo %}
+    <div class="header-banner">
+        <img src="{{ print_settings.logo.url }}" alt="Header Banner">
+    </div>
+    {% endif %}
+</div>
+
+<div class="print-footer">
+    <div class="footer-right">
+        {% if print_settings and print_settings.footer_text_ar %}
+            {{ print_settings.footer_text_ar }}
+        {% endif %}
+    </div>
+
+    <div class="footer-left">
+        {% if print_settings and print_settings.footer_text_en %}
+            {{ print_settings.footer_text_en }}
+        {% endif %}
+    </div>
+</div>
+
+<div class="page-content">
+
+    <div class="doc-title">فاتورة</div>
+
+    <table class="top-info">
+        <tr>
+            <td><strong>رقم الفاتورة:</strong> {{ invoice.id }}</td>
+            <td><strong>تاريخ الفاتورة:</strong> {{ invoice.invoice_date }}</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>اسم العميل:</strong> {{ invoice.customer_name }}</td>
+        </tr>
+    </table>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th>الصنف</th>
+                <th>التشغيلة</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>إجمالي البند</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in invoice.items.all %}
+            <tr>
+                <td>{{ row.item.item_name }}</td>
+                <td>{{ row.lot.lot_number }}</td>
+                <td>{{ row.quantity }}</td>
+                <td>{{ row.price }}</td>
+                <td>{{ row.total }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">لا توجد بنود</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals">
+        <tr>
+            <td class="label">الإجمالي قبل الخصم</td>
+            <td>{{ invoice.subtotal }}</td>
+        </tr>
+        <tr>
+            <td class="label">نسبة الخصم %</td>
+            <td>{{ invoice.discount_percent }}</td>
+        </tr>
+        <tr>
+            <td class="label">قيمة الخصم</td>
+            <td>{{ invoice.discount_amount }}</td>
+        </tr>
+        <tr>
+            <td class="label">الصافي قبل الضريبة</td>
+            <td>{{ invoice.net_before_vat }}</td>
+        </tr>
+        <tr>
+            <td class="label">ضريبة القيمة المضافة %</td>
+            <td>{{ invoice.vat_percent }}</td>
+        </tr>
+        <tr>
+            <td class="label">قيمة الضريبة</td>
+            <td>{{ invoice.vat_amount }}</td>
+        </tr>
+        <tr>
+            <td class="final">الإجمالي النهائي</td>
+            <td class="final">{{ invoice.total_after_vat }}</td>
+        </tr>
+    </table>
+
+    <div class="notes">
+        <div class="notes-title">ملاحظات</div>
+        <div>{{ invoice.notes|default:"-" }}</div>
+    </div>
+
+    <div class="signatures">
+        <div class="sign-box">
+            <div class="sign-line">المسؤول المالي</div>
+        </div>
+        <div class="sign-box">
+            <div class="sign-line">الختم والتوقيع</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}شجرة الحسابات{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>شجرة الحسابات</h1>
+        <div class="sub">عرض الحسابات وربطها بالنظام المالي</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'accounting_dashboard' %}">لوحة الحسابات</a>
+        <a href="{% url 'account_create' %}">+ حساب جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالكود أو الاسم أو النوع"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>الكود</th>
+                <th>اسم الحساب</th>
+                <th>النوع</th>
+                <th>الأب</th>
+                <th>نشط</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.code }}</td>
+                <td>{{ account.name }}</td>
+                <td>{{ account.account_type }}</td>
+                <td>{% if account.parent %}{{ account.parent.name }}{% else %}-{% endif %}</td>
+                <td>{% if account.is_active %}نعم{% else %}لا{% endif %}</td>
+                <td>
+                    <a href="{% url 'account_edit' account.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد حسابات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<style>
+    .form-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 18px;
+    }
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+    }
+    .items-table th, .items-table td {
+        border: 1px solid #ddd;
+        padding: 10px 8px;
+        text-align: center;
+        vertical-align: top;
+    }
+    .items-table th {
+        background: #eef4f7;
+        color: #0f3d56;
+        font-weight: bold;
+    }
+    .hidden-empty-form { display:none; }
+    .add-row-btn {
+        margin-top: 14px;
+        border: none;
+        background: #198754;
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .delete-row-btn {
+        border: none;
+        background: #dc3545;
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .totals-box {
+        width: 420px;
+        max-width: 100%;
+        margin-right: auto;
+        margin-top: 20px;
+    }
+    .totals-box table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+    .totals-box .label {
+        background: #f7f7f7;
+        font-weight: bold;
+    }
+</style>
+
+<div class="topbar">
+    <div>
+        <h1>{{ page_title }}</h1>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'quotation_list' %}">رجوع</a>
+        {% if is_edit %}
+        <a href="{% url 'quotation_print' quotation.id %}" target="_blank">طباعة</a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    <div class="form-card">
+        <h3 style="margin-top:0; color:#0f3d56;">بيانات عرض السعر</h3>
+        <div class="grid-2">
+            {% for field in quotation_form %}
+            <div {% if field.name == 'customer_address_manual' or field.name == 'notes' or field.name == 'terms' %}style="grid-column:1 / -1;"{% endif %}>
+                <label style="display:block; margin-bottom:6px;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color:red; margin-top:5px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3 style="margin-top:0; color:#0f3d56;">بنود عرض السعر</h3>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>نوع البند</th>
+                    <th>الصنف المخزني</th>
+                    <th>احتياج الصيانة</th>
+                    <th>الوصف</th>
+                    <th>الكمية</th>
+                    <th>سعر الوحدة</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody id="items-body">
+                {% for form in formset %}
+                <tr>
+                    <td>{{ form.id }}{{ form.item_type }}</td>
+                    <td>{{ form.inventory_item }}</td>
+                    <td>{{ form.maintenance_requirement }}</td>
+                    <td>{{ form.description }}</td>
+                    <td>{{ form.quantity }}</td>
+                    <td>{{ form.price }}</td>
+                    <td>
+                        {% if form.DELETE %}{{ form.DELETE }}{% endif %}
+                        <button type="button" class="delete-row-btn" onclick="removeRow(this)">حذف</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="button" class="add-row-btn" onclick="addRow()">+ إضافة بند</button>
+
+        <div id="empty-form-template" class="hidden-empty-form">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>{{ formset.empty_form.id }}{{ formset.empty_form.item_type }}</td>
+                        <td>{{ formset.empty_form.inventory_item }}</td>
+                        <td>{{ formset.empty_form.maintenance_requirement }}</td>
+                        <td>{{ formset.empty_form.description }}</td>
+                        <td>{{ formset.empty_form.quantity }}</td>
+                        <td>{{ formset.empty_form.price }}</td>
+                        <td>
+                            {% if formset.empty_form.DELETE %}{{ formset.empty_form.DELETE }}{% endif %}
+                            <button type="button" class="delete-row-btn" onclick="removeRow(this)">حذف</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_edit %}
+        <div class="totals-box">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr><td class="label">الإجمالي قبل الخصم</td><td>{{ quotation.subtotal }}</td></tr>
+                <tr><td class="label">قيمة الخصم</td><td>{{ quotation.discount_amount }}</td></tr>
+                <tr><td class="label">الصافي قبل الضريبة</td><td>{{ quotation.net_before_vat }}</td></tr>
+                <tr><td class="label">قيمة الضريبة</td><td>{{ quotation.vat_amount }}</td></tr>
+                <tr><td class="label">الإجمالي النهائي</td><td>{{ quotation.total_after_vat }}</td></tr>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="margin-top:20px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            حفظ
+        </button>
+    </div>
+</form>
+
+<script>
+function addRow() {
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const currentCount = parseInt(totalForms.value, 10);
+
+    let templateHtml = document.getElementById('empty-form-template').innerHTML;
+    templateHtml = templateHtml.replace(/__prefix__/g, currentCount);
+
+    const tempDiv = document.createElement('tbody');
+    tempDiv.innerHTML = templateHtml.trim();
+
+    const newRow = tempDiv.querySelector('tr');
+    document.getElementById('items-body').appendChild(newRow);
+
+    totalForms.value = currentCount + 1;
+}
+
+function removeRow(button) {
+    const row = button.closest('tr');
+    const deleteInput = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+
+    if (deleteInput) {
+        deleteInput.checked = true;
+        row.style.display = 'none';
+    } else {
+        row.remove();
+    }
+}
+</script>
+{% endblock %}

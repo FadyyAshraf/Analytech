@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف سند قبض{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div><h1>حذف سند قبض</h1></div>
+    <div class="quick-links">
+        <a href="{% url 'receipt_voucher_list' %}">رجوع</a>
+    </div>
+</div>
+
+<div class="section">
+    <p style="font-size:18px; margin-bottom:20px;">
+        هل أنت متأكد من حذف سند القبض رقم <strong>{{ voucher.id }}</strong>؟
+    </p>
+
+    <div style="margin-bottom:20px;">
+        <strong>العميل:</strong> {% if voucher.customer %}{{ voucher.customer.name }}{% else %}-{% endif %}<br>
+        <strong>الدافع:</strong> {{ voucher.payer_name }}<br>
+        <strong>المبلغ:</strong> {{ voucher.amount }}<br>
+        <strong>التاريخ:</strong> {{ voucher.voucher_date }}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="padding:12px 18px; background:#b02a37; color:white; border:none; border-radius:8px;">
+            تأكيد الحذف
+        </button>
+    </form>
+</div>
+{% endblock %}

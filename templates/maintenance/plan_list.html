@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}خطط الصيانة الوقائية{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>خطط الصيانة الوقائية</h1>
+        <div class="sub">الجداول الزمنية والتنبيه للزيارات المستحقة والمتأخرة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'preventive_plan_sync' %}">مزامنة كل الأجهزة</a>
+        <a href="{% url 'preventive_plan_create' %}">+ خطة جديدة</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث بالعميل أو الجهاز أو السيريال"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>نوع الفترة</th>
+                <th>عدد الأيام</th>
+                <th>آخر زيارة</th>
+                <th>الزيارة القادمة</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in plans %}
+            <tr {% if p.is_overdue %}style="background:#ffe5e5;"{% elif p.is_due %}style="background:#fff7db;"{% endif %}>
+                <td>{{ p.customer.name }}</td>
+                <td>{{ p.device.device_name }}</td>
+                <td>{{ p.get_interval_type_display }}</td>
+                <td>{{ p.get_interval_days }}</td>
+                <td>{{ p.last_visit_date|default:"-" }}</td>
+                <td>{{ p.next_due_date|default:"-" }}</td>
+                <td>
+                    {% if p.is_overdue %}
+                        متأخرة
+                    {% elif p.is_due %}
+                        مستحقة الآن
+                    {% else %}
+                        طبيعية
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'preventive_plan_edit' p.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد خطط</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}ميزان المراجعة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>ميزان المراجعة</h1>
+        <div class="sub">إجمالي أرصدة الحسابات المدينة والدائنة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'accounting_dashboard' %}">لوحة الحسابات</a>
+        <a href="{% url 'account_list' %}">شجرة الحسابات</a>
+    </div>
+</div>
+
+<div class="section">
+    <table>
+        <thead>
+            <tr>
+                <th>الكود</th>
+                <th>اسم الحساب</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.account.code }}</td>
+                <td>{{ row.account.name }}</td>
+                <td>{{ row.debit }}</td>
+                <td>{{ row.credit }}</td>
+                <td>{{ row.balance }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="font-weight:bold; background:#eef4f7;">
+                <td colspan="2">الإجمالي</td>
+                <td>{{ total_debit }}</td>
+                <td>{{ total_credit }}</td>
+                <td>-</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}

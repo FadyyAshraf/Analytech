@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>Dashboard</h1>
+        <div class="sub">الواجهة الرئيسية الموحدة للنظام حسب الهيكل النهائي</div>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>العملاء</h3>
+        <div class="value">👥</div>
+        <div class="sub">ملفات العملاء والأجهزة والمبيعات والصيانة المرتبطة</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/customers/">قائمة العملاء</a>
+            <a href="/customers/new/">عميل جديد</a>
+        </div>
+    </div>
+
+    <div class="hub-card">
+        <h3>الموظفون</h3>
+        <div class="value">🧑‍💼</div>
+        <div class="sub">الموظفون والعمولات والرواتب والبيانات الإدارية</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/employees/">لوحة الموظفين</a>
+            <a href="/employees/list/">قائمة الموظفين</a>
+            <a href="/employees/create/">موظف جديد</a>
+        </div>
+    </div>
+
+    <div class="hub-card">
+        <h3>المبيعات</h3>
+        <div class="value">📄</div>
+        <div class="sub">عروض الأسعار والفواتير والعمولات ولوحة المبيعات</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/reports/sales/">لوحة المبيعات</a>
+            <a href="/quotations/">عروض الأسعار</a>
+            <a href="/invoices/">الفواتير</a>
+            <a href="/reports/commissions/">العمولات</a>
+        </div>
+    </div>
+
+    <div class="hub-card">
+        <h3>الصيانة</h3>
+        <div class="value">🔧</div>
+        <div class="sub">طلبات الصيانة والزيارات والخطط الوقائية وتقارير الأداء</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/maintenance/reports/">لوحة الصيانة</a>
+            <a href="/maintenance/requests/">الطلبات</a>
+            <a href="/maintenance/visits/">الزيارات</a>
+            <a href="/maintenance/plans/">الخطط الوقائية</a>
+        </div>
+    </div>
+
+    <div class="hub-card">
+        <h3>المخزن</h3>
+        <div class="value">📦</div>
+        <div class="sub">الأصناف والتشغيلات والحركات والتنبيهات والتقارير</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/inventory/">لوحة المخزن</a>
+            <a href="/inventory/items/">الأصناف</a>
+            <a href="/inventory/lots/">التشغيلات</a>
+            <a href="/inventory/transactions/">الحركات</a>
+        </div>
+    </div>
+
+    <div class="hub-card">
+        <h3>الحسابات</h3>
+        <div class="value">💰</div>
+        <div class="sub">الحسابات العامة والقيود والسندات والتقارير المالية</div>
+        <div class="links" style="margin-top:12px;">
+            <a href="/accounting/">لوحة الحسابات</a>
+            <a href="/accounting/accounts/">شجرة الحسابات</a>
+            <a href="/accounting/journal/">القيود</a>
+            <a href="/accounting/customer-statement/">كشف حساب العميل</a>
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom:25px;">
+    <h2 style="margin-bottom:10px;">📦 مؤشرات المخزن</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
+        <div class="section">
+            <h3 style="margin-top:0;">عدد الأصناف</h3>
+            <div style="font-size:28px; font-weight:bold; color:#0f3d56;">{{ total_items|default:0 }}</div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">أصناف أقل من الحد</h3>
+            <div style="font-size:28px; font-weight:bold; color:#b02a37;">{{ low_stock_count|default:0 }}</div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">تشغيلات قربت تنتهي</h3>
+            <div style="font-size:28px; font-weight:bold; color:#b26a00;">{{ expiring_lots_count|default:0 }}</div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">إشعارات سحب مفتوحة</h3>
+            <div style="font-size:28px; font-weight:bold; color:#7a1f1f;">{{ recall_open_count|default:0 }}</div>
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom:25px;">
+    <h2 style="margin-bottom:10px;">🔧 مؤشرات الصيانة</h2>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
+        <div class="section">
+            <h3 style="margin-top:0;">زيارات وقائية متأخرة</h3>
+            <div style="font-size:28px; font-weight:bold; color:#b02a37;">
+                {{ maintenance_overdue_count|default:0 }}
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">زيارات مستحقة الآن</h3>
+            <div style="font-size:28px; font-weight:bold; color:#b26a00;">
+                {{ maintenance_due_count|default:0 }}
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">طلبات صيانة مفتوحة</h3>
+            <div style="font-size:28px; font-weight:bold; color:#0f3d56;">
+                {{ maintenance_open_requests|default:0 }}
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-top:0;">بانتظار قطع غيار</h3>
+            <div style="font-size:28px; font-weight:bold; color:#7a1f1f;">
+                {{ maintenance_waiting_parts|default:0 }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر حركات المخزن</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>الصنف</th>
+                <th>التشغيلة</th>
+                <th>النوع</th>
+                <th>الكمية</th>
+                <th>المصدر</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in recent_transactions %}
+            <tr>
+                <td>{{ tx.transaction_date }}</td>
+                <td>{{ tx.item.item_name }}</td>
+                <td>{% if tx.lot %}{{ tx.lot.lot_number }}{% else %}-{% endif %}</td>
+                <td>{{ tx.get_transaction_type_display }}</td>
+                <td>{{ tx.quantity }}</td>
+                <td>{{ tx.source_name|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">
+                    لا توجد حركات حديثة
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}سندات القبض{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>سندات القبض</h1>
+        <div class="sub">تحصيلات العملاء</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'receipt_voucher_create' %}">+ سند قبض جديد</a>
+        <a href="{% url 'customer_statement' %}">كشف حساب العميل</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث باسم العميل أو الدافع أو المرجع أو البيان"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>التاريخ</th>
+                <th>العميل</th>
+                <th>الدافع</th>
+                <th>المبلغ</th>
+                <th>الطريقة</th>
+                <th>المرجع</th>
+                <th>القيد</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voucher in vouchers %}
+            <tr>
+                <td>{{ voucher.id }}</td>
+                <td>{{ voucher.voucher_date }}</td>
+                <td>{% if voucher.customer %}{{ voucher.customer.name }}{% else %}-{% endif %}</td>
+                <td>{{ voucher.payer_name }}</td>
+                <td>{{ voucher.amount }}</td>
+                <td>{{ voucher.get_payment_method_display }}</td>
+                <td>{{ voucher.reference|default:"-" }}</td>
+                <td>{% if voucher.journal_entry %}{{ voucher.journal_entry.id }}{% else %}-{% endif %}</td>
+                <td>
+                    <a href="{% url 'receipt_voucher_edit' voucher.id %}">تعديل</a>
+                    |
+                    <a href="{% url 'receipt_voucher_delete' voucher.id %}">حذف</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="padding:20px; text-align:center;">لا توجد سندات قبض</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

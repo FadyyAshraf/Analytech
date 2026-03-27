@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}فاتورة {{ invoice.id }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>فاتورة رقم {{ invoice.id }}</h1>
+        <div class="sub">تفاصيل الفاتورة وإضافة البنود</div>
+    </div>
+
+    <div class="quick-links">
+        <a href="{% url 'invoice_print' invoice.id %}" target="_blank">طباعة</a>
+        <a href="{% url 'invoice_list' %}">رجوع للفواتير</a>
+    </div>
+</div>
+
+<div class="sections">
+    <div class="section">
+        <h3>بيانات الفاتورة</h3>
+        <ul class="list">
+            <li><strong>رقم الفاتورة:</strong> {{ invoice.id }}</li>
+            <li><strong>اسم العميل:</strong> {{ invoice.customer_name }}</li>
+            <li><strong>تاريخ الفاتورة:</strong> {{ invoice.invoice_date }}</li>
+            <li><strong>نسبة الخصم:</strong> {{ invoice.discount_percent }} %</li>
+            <li><strong>نسبة الضريبة:</strong> {{ invoice.vat_percent }} %</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>الإجماليات</h3>
+        <ul class="list">
+            <li><strong>الإجمالي قبل الخصم:</strong> {{ invoice.subtotal }}</li>
+            <li><strong>قيمة الخصم:</strong> {{ invoice.discount_amount }}</li>
+            <li><strong>الصافي قبل الضريبة:</strong> {{ invoice.net_before_vat }}</li>
+            <li><strong>قيمة الضريبة:</strong> {{ invoice.vat_amount }}</li>
+            <li><strong>الإجمالي النهائي:</strong> {{ invoice.total_after_vat }}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="section" style="margin-top:18px;">
+    <h3>إضافة بند جديد</h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns:2fr 2fr 1fr 1fr auto; gap:12px; align-items:end;">
+            <div>
+                <label style="display:block; margin-bottom:6px;">الصنف</label>
+                <select name="item" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                    <option value="">اختر الصنف</option>
+                    {% for i in items %}
+                        <option value="{{ i.id }}">{{ i.item_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display:block; margin-bottom:6px;">التشغيلة</label>
+                <select name="lot" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                    <option value="">اختر التشغيلة</option>
+                    {% for l in lots %}
+                        <option value="{{ l.id }}">{{ l.item.item_name }} - {{ l.lot_number }} ({{ l.quantity }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display:block; margin-bottom:6px;">الكمية</label>
+                <input type="number" step="0.01" name="quantity" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
+            </div>
+
+            <div>
+                <label style="display:block; margin-bottom:6px;">سعر الوحدة</label>
+                <input type="number" step="0.01" name="price" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
+            </div>
+
+            <div>
+                <button type="submit" style="padding:11px 16px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;">
+                    إضافة
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="section" style="margin-top:18px;">
+    <h3>بنود الفاتورة</h3>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th style="padding:12px; border:1px solid #ddd;">الصنف</th>
+                <th style="padding:12px; border:1px solid #ddd;">التشغيلة</th>
+                <th style="padding:12px; border:1px solid #ddd;">الكمية</th>
+                <th style="padding:12px; border:1px solid #ddd;">سعر الوحدة</th>
+                <th style="padding:12px; border:1px solid #ddd;">إجمالي البند</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in invoice.items.all %}
+            <tr>
+                <td style="padding:12px; border:1px solid #ddd;">{{ row.item.item_name }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ row.lot.lot_number }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ row.quantity }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ row.price }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ row.total }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center; border:1px solid #ddd;">
+                    لا توجد بنود بعد
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

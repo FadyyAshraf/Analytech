@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}طلبات البيع{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>طلبات البيع</h1>
+        <div class="sub">إدارة الطلبات من لحظة الطلب حتى التسليم والاستلام</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'sales_order_create' %}">+ طلب بيع جديد</a>
+        <a href="/reports/sales/">لوحة المبيعات</a>
+    </div>
+</div>
+
+<div class="section">
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>التاريخ</th>
+                <th>المسؤول</th>
+                <th>طريقة التوصيل</th>
+                <th>الحالة</th>
+                <th>الإجمالي</th>
+                <th>الفاتورة</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in orders %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.customer.name }}</td>
+                <td>{{ row.order_date }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_delivery_method_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.subtotal }}</td>
+                <td>{% if row.invoice %}{{ row.invoice.id }}{% else %}-{% endif %}</td>
+                <td>
+                    <a href="{% url 'sales_order_detail' row.id %}">فتح</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="padding:20px; text-align:center;">لا توجد طلبات بيع</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

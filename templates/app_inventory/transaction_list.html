@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}حركات المخزن{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>حركات المخزن</h1>
+        <div class="sub">كل حركات الوارد والمنصرف والتسويات</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'inventory_transaction_create' %}">+ حركة جديدة</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="بحث بالصنف أو التشغيلة أو المرجع"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>التاريخ</th>
+                <th>الصنف</th>
+                <th>التشغيلة</th>
+                <th>النوع</th>
+                <th>المصدر</th>
+                <th>الكمية</th>
+                <th>الرصيد قبل</th>
+                <th>الرصيد بعد</th>
+                <th>المرجع</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions %}
+            <tr>
+                <td>{{ tx.transaction_date }}</td>
+                <td>{{ tx.item.item_name }}</td>
+                <td>{% if tx.lot %}{{ tx.lot.lot_number }}{% else %}-{% endif %}</td>
+                <td>{{ tx.get_transaction_type_display }}</td>
+                <td>{{ tx.source_name|default:"-" }}</td>
+                <td>{{ tx.quantity }}</td>
+                <td>{{ tx.balance_before }}</td>
+                <td>{{ tx.balance_after }}</td>
+                <td>{{ tx.reference|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">لا توجد حركات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

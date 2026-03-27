@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة الموظفين{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>قائمة الموظفين</h1>
+        <div class="sub">إدارة الموظفين والبيانات الأساسية</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'employee_dashboard' %}">لوحة الموظفين</a>
+        <a href="{% url 'employee_create' %}">+ موظف جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالكود أو الاسم أو القسم أو الوظيفة"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>الكود</th>
+                <th>الاسم</th>
+                <th>القسم</th>
+                <th>الوظيفة</th>
+                <th>الحالة</th>
+                <th>الهاتف</th>
+                <th>تاريخ التعيين</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in employees %}
+            <tr>
+                <td>{{ row.employee_code }}</td>
+                <td>{{ row.full_name }}</td>
+                <td>{{ row.department|default:"-" }}</td>
+                <td>{{ row.job_title|default:"-" }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.phone|default:"-" }}</td>
+                <td>{{ row.hire_date }}</td>
+                <td>
+                    <a href="{% url 'employee_detail' row.id %}">فتح</a>
+                    |
+                    <a href="{% url 'employee_edit' row.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

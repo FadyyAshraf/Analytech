@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}العملاء المتأخرون في الصيانة الوقائية{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>العملاء المتأخرون في الصيانة الوقائية</h1>
+        <div class="sub">بيان كامل بالعملاء والأجهزة التي لم تُنفذ لها الصيانة الوقائية في موعدها</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث بالعميل أو الجهاز أو السيريال" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#ffe5e5;">
+                <th>العميل</th>
+                <th>الهاتف</th>
+                <th>العنوان</th>
+                <th>المسؤول</th>
+                <th>الجهاز</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>تاريخ التركيب</th>
+                <th>آخر PM</th>
+                <th>آخر زيارة</th>
+                <th>تاريخ الاستحقاق</th>
+                <th>التأخير</th>
+                <th>سجل الجهاز</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr style="background:#fff8f8;">
+                <td>{{ row.customer_name }}</td>
+                <td>{{ row.customer_phone }}</td>
+                <td>{{ row.customer_address }}</td>
+                <td>{{ row.contact_person }}</td>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.device_model }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.installation_date|default:"-" }}</td>
+                <td>{{ row.last_preventive_visit|default:"-" }}</td>
+                <td>{{ row.latest_any_visit|default:"-" }}</td>
+                <td>{{ row.next_due_date|default:"-" }}</td>
+                <td>{{ row.delay_days }} يوم</td>
+                <td><a href="{% url 'device_history_detail' row.device_id %}">فتح</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="13" style="padding:20px; text-align:center;">لا توجد أجهزة متأخرة حاليًا</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

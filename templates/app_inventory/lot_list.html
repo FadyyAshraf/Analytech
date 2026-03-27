@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}التشغيلات{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>التشغيلات</h1>
+        <div class="sub">إدارة تشغيلات المخزون وتواريخ الانتهاء</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'inventory_lot_create' %}">+ تشغيلة جديدة</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="بحث باسم الصنف أو رقم التشغيلة"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>الصنف</th>
+                <th>رقم التشغيلة</th>
+                <th>الكمية</th>
+                <th>تاريخ الانتهاء</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lot in lots %}
+            <tr>
+                <td>{{ lot.item.item_name }}</td>
+                <td>{{ lot.lot_number }}</td>
+                <td>{{ lot.quantity }}</td>
+                <td>{{ lot.expiry_date|default:"-" }}</td>
+                <td>
+                    {% if lot.is_expired %}
+                        منتهية
+                    {% elif lot.is_expiring_soon %}
+                        قربت تنتهي
+                    {% else %}
+                        سليمة
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'inventory_lot_edit' lot.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">لا توجد تشغيلات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

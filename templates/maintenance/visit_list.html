@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}زيارات الصيانة{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>زيارات الصيانة</h1>
+        <div class="sub">الزيارات الطارئة والدورية والمتابعة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_visit_create' %}">+ زيارة جديدة</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث بالعميل أو الجهاز أو السيريال أو المهندس"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>المهندس</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in visits %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.customer.name }}</td>
+                <td>{{ v.device.device_name }}</td>
+                <td>{{ v.get_visit_type_display }}</td>
+                <td>{{ v.get_status_display }}</td>
+                <td>{{ v.visit_date }}</td>
+                <td>{% if v.engineer %}{{ v.engineer.full_name }}{% else %}{{ v.engineer_name|default:"-" }}{% endif %}</td>
+                <td>
+                    <a href="{% url 'maintenance_visit_edit' v.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد زيارات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير أعمال المهندسين{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>تقرير أعمال المهندسين</h1>
+        <div class="sub">عدد الزيارات والمهام والعملاء والأجهزة لكل مهندس</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث باسم المهندس" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="from_date" value="{{ from_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input type="date" name="to_date" value="{{ to_date }}" style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>المهندس</th>
+                <th>إجمالي الزيارات</th>
+                <th>وقائي</th>
+                <th>طارئ</th>
+                <th>متابعة</th>
+                <th>تركيب</th>
+                <th>تدريب</th>
+                <th>تم الحل</th>
+                <th>مغلقة</th>
+                <th>تقارير موقعة</th>
+                <th>العملاء</th>
+                <th>الأجهزة</th>
+                <th>احتياجات/قطع</th>
+                <th>تم تركيبها</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.engineer_name }}</td>
+                <td>{{ row.total_visits }}</td>
+                <td>{{ row.preventive_visits }}</td>
+                <td>{{ row.emergency_visits }}</td>
+                <td>{{ row.followup_visits }}</td>
+                <td>{{ row.installation_visits }}</td>
+                <td>{{ row.training_visits }}</td>
+                <td>{{ row.resolved_visits }}</td>
+                <td>{{ row.closed_visits }}</td>
+                <td>{{ row.signed_reports }}</td>
+                <td>{{ row.customers_count }}</td>
+                <td>{{ row.devices_count }}</td>
+                <td>{{ row.requirements_count }}</td>
+                <td>{{ row.installed_requirements }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="14" style="padding:20px; text-align:center;">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% for row in rows %}
+    <div style="margin-top:18px; background:#fff; border:1px solid #eee; border-radius:10px; padding:14px;">
+        <div style="font-weight:bold; margin-bottom:8px;">{{ row.engineer_name }}</div>
+        <div><strong>العملاء:</strong> {{ row.customers_list }}</div>
+        <div style="margin-top:6px;"><strong>الأجهزة:</strong> {{ row.devices_list }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

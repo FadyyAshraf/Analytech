@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}تاريخ الجهاز{% endblock %}
+
+{% block content %}
+{% if device_list_mode %}
+<div class="topbar">
+    <div>
+        <h1>تاريخ الجهاز الكامل</h1>
+        <div class="sub">ابحث عن جهاز لعرض كل تاريخه الفني والصيانة المرتبطة به</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'maintenance_reports_dashboard' %}">رجوع للتقارير</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="ابحث باسم الجهاز أو السيريال أو العميل" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit" style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">بحث</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>العميل</th>
+                <th>الجهاز</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>تاريخ التركيب</th>
+                <th>آخر زيارة</th>
+                <th>آخر PM</th>
+                <th>فتح السجل</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.customer_name }}</td>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.device_model }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.installation_date|default:"-" }}</td>
+                <td>{{ row.latest_visit|default:"-" }}</td>
+                <td>{{ row.latest_preventive|default:"-" }}</td>
+                <td><a href="{% url 'device_history_detail' row.device_id %}">فتح</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:20px; text-align:center;">لا توجد أجهزة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="topbar">
+    <div>
+        <h1>سجل الجهاز الكامل</h1>
+        <div class="sub">{{ device_name }} - {{ serial_number }}</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'device_history_report' %}">رجوع للأجهزة</a>
+    </div>
+</div>
+
+<div class="section">
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:20px;">
+        <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:14px;">
+            <div><strong>العميل:</strong> {{ customer_name }}</div>
+            <div style="margin-top:6px;"><strong>الهاتف:</strong> {{ customer_phone|default:"-" }}</div>
+            <div style="margin-top:6px;"><strong>العنوان:</strong> {{ customer_address|default:"-" }}</div>
+            <div style="margin-top:6px;"><strong>المسؤول:</strong> {{ contact_person|default:"-" }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:14px;">
+            <div><strong>الجهاز:</strong> {{ device_name }}</div>
+            <div style="margin-top:6px;"><strong>النوع:</strong> {{ device_type }}</div>
+            <div style="margin-top:6px;"><strong>الموديل:</strong> {{ device_model }}</div>
+            <div style="margin-top:6px;"><strong>السيريال:</strong> {{ serial_number }}</div>
+            <div style="margin-top:6px;"><strong>تاريخ التركيب:</strong> {{ installation_date|default:"-" }}</div>
+        </div>
+        <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:14px;">
+            <div><strong>آخر زيارة:</strong> {{ latest_visit.visit_date|default:"-" }}</div>
+            <div style="margin-top:6px;"><strong>آخر PM:</strong> {{ latest_preventive.visit_date|default:"-" }}</div>
+            {% if plan %}
+            <div style="margin-top:6px;"><strong>الخطة الوقائية:</strong> {{ plan.get_interval_type_display }}</div>
+            <div style="margin-top:6px;"><strong>الاستحقاق القادم:</strong> {{ plan.next_due_date|default:"-" }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <h3>طلبات الصيانة</h3>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>رقم</th>
+                <th>تاريخ البلاغ</th>
+                <th>الأولوية</th>
+                <th>الحالة</th>
+                <th>وصف العطل</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.request_date }}</td>
+                <td>{{ r.get_priority_display }}</td>
+                <td>{{ r.get_status_display }}</td>
+                <td>{{ r.issue_description }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:16px; text-align:center;">لا توجد طلبات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>زيارات الصيانة</h3>
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>رقم</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>المهندس</th>
+                <th>الموعد المستهدف</th>
+                <th>في الموعد</th>
+                <th>النتيجة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in visits %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.get_visit_type_display }}</td>
+                <td>{{ v.get_status_display }}</td>
+                <td>{{ v.visit_date }}</td>
+                <td>{{ v.engineer_name|default:"-" }}</td>
+                <td>{{ v.planned_due_date|default:"-" }}</td>
+                <td>{% if v.completed_on_time %}نعم{% else %}-{% endif %}</td>
+                <td>{{ v.final_result|default:"-" }}</td>
+            </tr>
+            {% if v.work_performed or v.issue_found or v.diluent_code or v.lyse_code or v.cleaner_code %}
+            <tr>
+                <td colspan="8" style="background:#fafafa; padding:10px;">
+                    {% if v.issue_found %}<div><strong>الملاحظات/العطل:</strong> {{ v.issue_found }}</div>{% endif %}
+                    {% if v.work_performed %}<div style="margin-top:6px;"><strong>الأعمال المنفذة:</strong> {{ v.work_performed }}</div>{% endif %}
+                    {% if v.diluent_code or v.lyse_code or v.cleaner_code %}
+                    <div style="margin-top:6px;">
+                        <strong>المحاليل وقت الزيارة:</strong>
+                        Diluent: {{ v.diluent_code|default:"-" }} |
+                        Lyse: {{ v.lyse_code|default:"-" }} |
+                        Cleaner: {{ v.cleaner_code|default:"-" }}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="8" style="padding:16px; text-align:center;">لا توجد زيارات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

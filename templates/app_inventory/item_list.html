@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}أصناف المخزن{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>أصناف المخزن</h1>
+        <div class="sub">إدارة الأصناف وأسعارها وحدودها الدنيا</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'inventory_item_create' %}">+ صنف جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="بحث باسم الصنف أو الكود أو المورد"
+               style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white; cursor:pointer;">
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th>ID</th>
+                <th>اسم الصنف</th>
+                <th>الكود</th>
+                <th>النوع</th>
+                <th>الكمية</th>
+                <th>الحد الأدنى</th>
+                <th>سعر البيع</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr {% if item.is_below_min %}style="background:#fff4f4;"{% endif %}>
+                <td>{{ item.id }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.get_item_type_display }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.min_stock }}</td>
+                <td>{{ item.sale_price }}</td>
+                <td>
+                    <a href="{% url 'inventory_item_edit' item.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">لا توجد أصناف</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير العمولات{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>تقرير العمولات</h1>
+        <div class="sub">كل العمولات المرتبطة بالمبيعات والفواتير</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'sales_dashboard' %}">لوحة المبيعات</a>
+        <a href="{% url 'invoice_list' %}">الفواتير</a>
+        <a href="{% url 'quotation_list' %}">عروض الأسعار</a>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>إجمالي العمولات</h3>
+        <div class="value">{{ total_commissions }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>عمولات معتمدة</h3>
+        <div class="value">{{ approved_total }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>عمولات مدفوعة</h3>
+        <div class="value">{{ paid_total }}</div>
+    </div>
+</div>
+
+<div class="section">
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>الموظف</th>
+                <th>العميل</th>
+                <th>عرض السعر</th>
+                <th>الفاتورة</th>
+                <th>قيمة الأساس</th>
+                <th>النسبة</th>
+                <th>العمولة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.commission_date }}</td>
+                <td>{{ row.employee.full_name }}</td>
+                <td>{% if row.customer %}{{ row.customer.name }}{% else %}-{% endif %}</td>
+                <td>{% if row.quotation %}{{ row.quotation.id }}{% else %}-{% endif %}</td>
+                <td>{% if row.invoice %}{{ row.invoice.id }}{% else %}-{% endif %}</td>
+                <td>{{ row.base_amount }}</td>
+                <td>{{ row.commission_percent }}</td>
+                <td>{{ row.commission_amount }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="padding:20px; text-align:center;">لا توجد عمولات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

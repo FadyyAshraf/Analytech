@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ device.device_name }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>{{ device.device_name }}</h1>
+        <div class="sub">السيريال: {{ device.serial_number }}</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'device_edit' device.id %}">تعديل</a>
+        <a href="{% url 'customer_detail' device.customer.id %}">ملف العميل</a>
+        <a href="{% url 'device_list' %}">رجوع</a>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">البيانات الأساسية</h2>
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+        <div><strong>العميل:</strong> {{ device.customer.name }}</div>
+        <div><strong>نوع الجهاز:</strong> {{ device.get_device_type_display }}</div>
+        <div><strong>الموديل:</strong> {{ device.model|default:"-" }}</div>
+        <div><strong>السيريال نمبر:</strong> {{ device.serial_number }}</div>
+        <div><strong>تاريخ التركيب:</strong> {{ device.installation_date|default:"-" }}</div>
+        <div><strong>نهاية الضمان:</strong> {{ device.warranty_end_date|default:"-" }}</div>
+        <div style="grid-column:1 / -1;"><strong>ملاحظات:</strong> {{ device.notes|default:"-" }}</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">الخطة الوقائية</h2>
+    {% if preventive_plan %}
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+            <div><strong>نوع الفترة:</strong> {{ preventive_plan.get_interval_type_display }}</div>
+            <div><strong>عدد الأيام:</strong> {{ preventive_plan.interval_days }}</div>
+            <div><strong>آخر زيارة:</strong> {{ preventive_plan.last_visit_date|default:"-" }}</div>
+            <div><strong>الزيارة القادمة:</strong> {{ preventive_plan.next_due_date|default:"-" }}</div>
+            <div><strong>الحالة:</strong>
+                {% if preventive_plan.is_overdue %}
+                    متأخرة
+                {% elif preventive_plan.is_due %}
+                    مستحقة
+                {% else %}
+                    ضمن الجدول
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div>لا توجد خطة وقائية مرتبطة بهذا الجهاز.</div>
+    {% endif %}
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">طلبات الصيانة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>الأولوية</th>
+                <th>الحالة</th>
+                <th>تاريخ البلاغ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in maintenance_requests %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.get_priority_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.request_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding:20px; text-align:center;">لا توجد طلبات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">زيارات الصيانة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>المهندس</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in maintenance_visits %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.get_visit_type_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{% if row.engineer %}{{ row.engineer.full_name }}{% else %}{{ row.engineer_name|default:"-" }}{% endif %}</td>
+                <td>{{ row.visit_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد زيارات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">عروض الأسعار</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>الموضوع</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in quotations %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.subject }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد عروض أسعار</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">الفواتير</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in invoices %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding:20px; text-align:center;">لا توجد فواتير مرتبطة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}العملاء{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>العملاء</h1>
+        <div class="sub">قائمة العملاء ومحور الربط الرئيسي للنظام</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'customer_create' %}">+ عميل جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث باسم العميل أو الهاتف أو الشخص المسؤول أو العنوان"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button type="submit"
+                style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;">
+            بحث
+        </button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اسم العميل</th>
+                <th>النوع</th>
+                <th>الهاتف</th>
+                <th>الشخص المسؤول</th>
+                <th>العنوان</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.get_customer_type_display }}</td>
+                <td>{{ customer.phone|default:"-" }}</td>
+                <td>{{ customer.contact_person|default:"-" }}</td>
+                <td>{{ customer.address|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'customer_detail' customer.id %}">فتح</a>
+                    |
+                    <a href="{% url 'customer_edit' customer.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد بيانات عملاء</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

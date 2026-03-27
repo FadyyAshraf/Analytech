@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة المبيعات{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>لوحة المبيعات</h1>
+        <div class="sub">لوحة موحدة لعروض الأسعار وطلبات البيع والفواتير والعمولات</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'quotation_list' %}">عروض الأسعار</a>
+        <a href="{% url 'sales_order_list' %}">طلبات البيع</a>
+        <a href="{% url 'invoice_list' %}">الفواتير</a>
+        <a href="{% url 'commission_report' %}">العمولات</a>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>عروض الأسعار</h3>
+        <div class="value">{{ total_quotations }}</div>
+        <div class="sub">إجمالي عروض الأسعار المسجلة</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>عروض محولة</h3>
+        <div class="value">{{ converted_quotations }}</div>
+        <div class="sub">العروض التي تم تحويلها إلى فواتير</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>عروض مسودة</h3>
+        <div class="value">{{ draft_quotations }}</div>
+        <div class="sub">العروض التي ما زالت تحت الإعداد</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>فواتير مرحلة</h3>
+        <div class="value">{{ posted_invoices }}</div>
+        <div class="sub">الفواتير التي تم ترحيلها</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إجمالي المبيعات</h3>
+        <div class="value">{{ total_sales|floatformat:2 }}</div>
+        <div class="sub">إجمالي الفواتير المرحلة فقط</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>متوسط الفاتورة</h3>
+        <div class="value">{{ avg_invoice|floatformat:2 }}</div>
+        <div class="sub">متوسط قيمة الفاتورة المرحلة</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إجمالي العمولات</h3>
+        <div class="value">{{ total_commissions|floatformat:2 }}</div>
+        <div class="sub">العمولات المعتمدة والمدفوعة</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>فواتير ملغاة</h3>
+        <div class="value">{{ cancelled_invoices }}</div>
+        <div class="sub">الفواتير الملغاة</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">أفضل الموظفين مبيعًا</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>الموظف</th>
+                <th>عدد الفواتير</th>
+                <th>إجمالي المبيعات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_sales_people %}
+            <tr>
+                <td>{{ row.sales_owner__full_name }}</td>
+                <td>{{ row.invoices_count }}</td>
+                <td>{{ row.sales_total|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="padding:20px; text-align:center;">لا توجد بيانات مبيعات كافية</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">آخر عروض الأسعار</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي النهائي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_quotations %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.display_customer_name }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد عروض أسعار</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر الفواتير</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي النهائي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_invoices %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.customer_name }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد فواتير</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

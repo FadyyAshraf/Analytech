@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}الموظفون{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>الموظفون والموارد البشرية</h1>
+        <div class="sub">لوحة متابعة شاملة للموظفين والرواتب والعمولات</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'employee_list' %}">قائمة الموظفين</a>
+        <a href="{% url 'employee_create' %}">+ موظف جديد</a>
+        <a href="{% url 'commission_list' %}">العمولات</a>
+        <a href="{% url 'payroll_list' %}">مسيرات الرواتب</a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:20px;">
+    <div class="section">
+        <h3 style="margin-top:0;">إجمالي الموظفين</h3>
+        <div style="font-size:28px; font-weight:bold; color:#0f3d56;">{{ total_employees }}</div>
+    </div>
+
+    <div class="section">
+        <h3 style="margin-top:0;">الموظفون النشطون</h3>
+        <div style="font-size:28px; font-weight:bold; color:#0f3d56;">{{ active_employees }}</div>
+    </div>
+
+    <div class="section">
+        <h3 style="margin-top:0;">مفعل لهم مبيعات</h3>
+        <div style="font-size:28px; font-weight:bold; color:#b26a00;">{{ sales_enabled }}</div>
+    </div>
+
+    <div class="section">
+        <h3 style="margin-top:0;">مفعل لهم صيانة</h3>
+        <div style="font-size:28px; font-weight:bold; color:#198754;">{{ service_enabled }}</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">اختصارات</h2>
+    <div class="quick-links">
+        <a href="{% url 'compensation_list' %}">البيانات المالية</a>
+        <a href="{% url 'penalty_list' %}">الجزاءات</a>
+        <a href="{% url 'bonus_list' %}">الحوافز والمكافآت</a>
+        <a href="{% url 'expense_list' %}">المصروفات المستردة</a>
+        <a href="{% url 'advance_list' %}">السلف</a>
+        <a href="{% url 'commission_list' %}">العمولات</a>
+        <a href="{% url 'payroll_list' %}">مسيرات الرواتب</a>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">آخر العمولات</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>الموظف</th>
+                <th>العميل</th>
+                <th>القيمة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_commissions %}
+            <tr>
+                <td>{{ row.commission_date }}</td>
+                <td>{{ row.employee.full_name }}</td>
+                <td>{% if row.customer %}{{ row.customer.name }}{% else %}-{% endif %}</td>
+                <td>{{ row.commission_amount }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد عمولات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر مسيرات الرواتب</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>الموظف</th>
+                <th>الشهر</th>
+                <th>السنة</th>
+                <th>الصافي</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_payrolls %}
+            <tr>
+                <td>{{ row.employee.full_name }}</td>
+                <td>{{ row.month }}</td>
+                <td>{{ row.year }}</td>
+                <td>{{ row.net_salary }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد مسيرات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

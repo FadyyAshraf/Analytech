@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة الحسابات{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>لوحة الحسابات</h1>
+        <div class="sub">لوحة موحدة لشجرة الحسابات والقيود والتحصيلات والتقارير المالية</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'account_list' %}">شجرة الحسابات</a>
+        <a href="{% url 'journal_entry_list' %}">القيود اليومية</a>
+        <a href="{% url 'receipt_voucher_list' %}">سندات القبض</a>
+        <a href="{% url 'payment_voucher_list' %}">سندات الصرف</a>
+    </div>
+</div>
+
+<div class="hub-grid" style="margin-bottom:25px;">
+    <div class="hub-card">
+        <h3>عدد الحسابات</h3>
+        <div class="value">{{ accounts_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إجمالي القيود</h3>
+        <div class="value">{{ journal_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>قيود مرحلة</h3>
+        <div class="value">{{ posted_journal_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>قيود مسودة</h3>
+        <div class="value">{{ draft_journal_count }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إجمالي سندات القبض</h3>
+        <div class="value">{{ receipts_total }}</div>
+    </div>
+
+    <div class="hub-card">
+        <h3>إجمالي سندات الصرف</h3>
+        <div class="value">{{ payments_total }}</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">آخر القيود اليومية</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>التاريخ</th>
+                <th>البيان</th>
+                <th>المرجع</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_entries %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.entry_date }}</td>
+                <td>{{ row.description }}</td>
+                <td>{{ row.reference|default:"-" }}</td>
+                <td>{{ row.status }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد قيود</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر سندات القبض</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>الطريقة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_receipts %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{% if row.customer %}{{ row.customer.name }}{% else %}-{% endif %}</td>
+                <td>{{ row.voucher_date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.get_payment_method_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد سندات قبض</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

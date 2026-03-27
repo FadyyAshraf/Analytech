@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>{{ customer.name }}</h1>
+        <div class="sub">ملف العميل الموحد داخل النظام</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'customer_edit' customer.id %}">تعديل</a>
+        <a href="{% url 'device_create' %}">+ جهاز جديد</a>
+        <a href="{% url 'customer_list' %}">رجوع</a>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">البيانات الأساسية</h2>
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+        <div><strong>اسم العميل:</strong> {{ customer.name }}</div>
+        <div><strong>النوع:</strong> {{ customer.get_customer_type_display }}</div>
+        <div><strong>الهاتف:</strong> {{ customer.phone|default:"-" }}</div>
+        <div><strong>الشخص المسؤول:</strong> {{ customer.contact_person|default:"-" }}</div>
+        <div style="grid-column:1 / -1;"><strong>العنوان:</strong> {{ customer.address|default:"-" }}</div>
+        <div style="grid-column:1 / -1;"><strong>ملاحظات:</strong> {{ customer.notes|default:"-" }}</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">الحساب المحاسبي</h2>
+    {% if account %}
+        <div><strong>الكود:</strong> {{ account.code }}</div>
+        <div><strong>الاسم:</strong> {{ account.name }}</div>
+        <div style="margin-top:12px;">
+            <a href="/accounting/customer-statement/?customer={{ customer.id }}"
+               style="display:inline-block; background:#0f3d56; color:white; padding:10px 14px; border-radius:8px; text-decoration:none;">
+                كشف حساب العميل
+            </a>
+        </div>
+    {% else %}
+        <div>لا يوجد حساب محاسبي مرتبط حاليًا.</div>
+    {% endif %}
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">الأجهزة المركبة عند العميل</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>اسم الجهاز</th>
+                <th>النوع</th>
+                <th>الموديل</th>
+                <th>السيريال</th>
+                <th>تاريخ التركيب</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in devices %}
+            <tr>
+                <td>{{ row.device_name }}</td>
+                <td>{{ row.get_device_type_display }}</td>
+                <td>{{ row.model|default:"-" }}</td>
+                <td>{{ row.serial_number }}</td>
+                <td>{{ row.installation_date|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'device_detail' row.id %}">فتح</a>
+                    |
+                    <a href="{% url 'device_edit' row.id %}">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد أجهزة مرتبطة بهذا العميل</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">عروض الأسعار</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>الموضوع</th>
+                <th>الجهاز</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in quotations %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.subject }}</td>
+                <td>{% if row.device %}{{ row.device.device_name }}{% else %}-{% endif %}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد عروض أسعار</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">الفواتير</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in invoices %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{% if row.sales_owner %}{{ row.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.total_after_vat }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding:20px; text-align:center;">لا توجد فواتير مرتبطة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">سندات القبض</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>الطريقة</th>
+                <th>القيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in receipt_vouchers %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.voucher_date }}</td>
+                <td>{{ row.amount }}</td>
+                <td>{{ row.get_payment_method_display }}</td>
+                <td>{% if row.journal_entry %}{{ row.journal_entry.id }}{% else %}-{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد سندات قبض</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">طلبات الصيانة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>الجهاز</th>
+                <th>الأولوية</th>
+                <th>الحالة</th>
+                <th>تاريخ البلاغ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in maintenance_requests %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.device.device_name }}</td>
+                <td>{{ row.get_priority_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.request_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد طلبات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">زيارات الصيانة</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم</th>
+                <th>الجهاز</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>المهندس</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in maintenance_visits %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.device.device_name }}</td>
+                <td>{{ row.get_visit_type_display }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{% if row.engineer %}{{ row.engineer.full_name }}{% else %}{{ row.engineer_name|default:"-" }}{% endif %}</td>
+                <td>{{ row.visit_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد زيارات صيانة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">الخطط الوقائية</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>الجهاز</th>
+                <th>نوع الفترة</th>
+                <th>آخر زيارة</th>
+                <th>الزيارة القادمة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in preventive_plans %}
+            <tr>
+                <td>{{ row.device.device_name }}</td>
+                <td>{{ row.get_interval_type_display }}</td>
+                <td>{{ row.last_visit_date|default:"-" }}</td>
+                <td>{{ row.next_due_date|default:"-" }}</td>
+                <td>
+                    {% if row.is_overdue %}
+                        متأخرة
+                    {% elif row.is_due %}
+                        مستحقة
+                    {% else %}
+                        ضمن الجدول
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding:20px; text-align:center;">لا توجد خطط وقائية</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">العمولات المرتبطة بالعميل</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>الموظف</th>
+                <th>عرض السعر</th>
+                <th>الفاتورة</th>
+                <th>العمولة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in employee_commissions %}
+            <tr>
+                <td>{{ row.commission_date }}</td>
+                <td>{{ row.employee.full_name }}</td>
+                <td>{% if row.quotation %}{{ row.quotation.id }}{% else %}-{% endif %}</td>
+                <td>{% if row.invoice %}{{ row.invoice.id }}{% else %}-{% endif %}</td>
+                <td>{{ row.commission_amount }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد عمولات مرتبطة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

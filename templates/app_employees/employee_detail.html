@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ employee.full_name }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>{{ employee.full_name }}</h1>
+        <div class="sub">{{ employee.employee_code }} | {{ employee.job_title|default:"-" }}</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'employee_edit' employee.id %}">تعديل</a>
+        <a href="{% url 'employee_list' %}">رجوع</a>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">البيانات الأساسية</h2>
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+        <div><strong>القسم:</strong> {{ employee.department|default:"-" }}</div>
+        <div><strong>الوظيفة:</strong> {{ employee.job_title|default:"-" }}</div>
+        <div><strong>الحالة:</strong> {{ employee.get_status_display }}</div>
+        <div><strong>تاريخ التعيين:</strong> {{ employee.hire_date }}</div>
+        <div><strong>الهاتف:</strong> {{ employee.phone|default:"-" }}</div>
+        <div><strong>البريد:</strong> {{ employee.email|default:"-" }}</div>
+        <div><strong>المؤهل:</strong> {{ employee.qualification|default:"-" }}</div>
+        <div><strong>التخصص:</strong> {{ employee.specialization|default:"-" }}</div>
+        <div><strong>مدير مباشر:</strong> {% if employee.direct_manager %}{{ employee.direct_manager.full_name }}{% else %}-{% endif %}</div>
+        <div><strong>رقم قومي:</strong> {{ employee.national_id|default:"-" }}</div>
+        <div style="grid-column:1 / -1;"><strong>العنوان:</strong> {{ employee.address|default:"-" }}</div>
+        <div style="grid-column:1 / -1;"><strong>ملاحظات:</strong> {{ employee.notes|default:"-" }}</div>
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">البيانات المالية</h2>
+    {% if compensation %}
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+            <div><strong>المرتب الأساسي:</strong> {{ compensation.basic_salary }}</div>
+            <div><strong>بدل انتقال:</strong> {{ compensation.transport_allowance }}</div>
+            <div><strong>بدل موبايل:</strong> {{ compensation.phone_allowance }}</div>
+            <div><strong>بدل سكن:</strong> {{ compensation.housing_allowance }}</div>
+            <div><strong>بدلات أخرى:</strong> {{ compensation.other_allowances }}</div>
+            <div><strong>إجمالي الثابت:</strong> {{ compensation.total_fixed }}</div>
+        </div>
+    {% else %}
+        <div>لا توجد بيانات مالية.</div>
+    {% endif %}
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <h2 style="margin-top:0;">آخر العمولات</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>العميل</th>
+                <th>قيمة الأساس</th>
+                <th>النسبة</th>
+                <th>العمولة</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in commissions %}
+            <tr>
+                <td>{{ row.commission_date }}</td>
+                <td>{% if row.customer %}{{ row.customer.name }}{% else %}-{% endif %}</td>
+                <td>{{ row.base_amount }}</td>
+                <td>{{ row.commission_percent }}</td>
+                <td>{{ row.commission_amount }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding:20px; text-align:center;">لا توجد عمولات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">آخر مسيرات الرواتب</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>الشهر</th>
+                <th>السنة</th>
+                <th>الصافي</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in payrolls %}
+            <tr>
+                <td>{{ row.month }}</td>
+                <td>{{ row.year }}</td>
+                <td>{{ row.net_salary }}</td>
+                <td>{{ row.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding:20px; text-align:center;">لا توجد مسيرات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}عروض الأسعار{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>عروض الأسعار</h1>
+        <div class="sub">إدارة عروض الأسعار العامة والصيانة</div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'quotation_create' %}">+ عرض سعر جديد</a>
+    </div>
+</div>
+
+<div class="section">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:18px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            placeholder="ابحث بالعميل أو المرجع أو الموضوع أو الموظف"
+            style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+        <button
+            type="submit"
+            style="padding:12px 18px; border:none; border-radius:8px; background:#0f3d56; color:white;"
+        >
+            بحث
+        </button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#eef4f7;">
+                <th style="padding:12px; border:1px solid #ddd;">رقم</th>
+                <th style="padding:12px; border:1px solid #ddd;">العميل</th>
+                <th style="padding:12px; border:1px solid #ddd;">الجهاز</th>
+                <th style="padding:12px; border:1px solid #ddd;">المسؤول</th>
+                <th style="padding:12px; border:1px solid #ddd;">صاحب العمولة</th>
+                <th style="padding:12px; border:1px solid #ddd;">النوع</th>
+                <th style="padding:12px; border:1px solid #ddd;">الحالة</th>
+                <th style="padding:12px; border:1px solid #ddd;">التاريخ</th>
+                <th style="padding:12px; border:1px solid #ddd;">الإجمالي النهائي</th>
+                <th style="padding:12px; border:1px solid #ddd;">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in quotations %}
+            <tr>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.id }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.display_customer_name }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{% if q.device %}{{ q.device.device_name }}{% else %}-{% endif %}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{% if q.sales_owner %}{{ q.sales_owner.full_name }}{% else %}-{% endif %}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{% if q.commission_owner %}{{ q.commission_owner.full_name }}{% else %}-{% endif %}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.get_quotation_type_display }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.get_status_display }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.quotation_date }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">{{ q.total_after_vat }}</td>
+                <td style="padding:12px; border:1px solid #ddd;">
+                    <a href="{% url 'quotation_detail' q.id %}" style="margin-left:10px;">فتح</a>
+                    <a href="{% url 'quotation_print' q.id %}" target="_blank" style="margin-left:10px;">طباعة</a>
+                    {% if q.status != 'Converted' %}
+                    <a href="{% url 'create_invoice_from_quotation' q.id %}">تحويل لفاتورة</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="padding:20px; text-align:center; border:1px solid #ddd;">
+                    لا توجد عروض أسعار
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

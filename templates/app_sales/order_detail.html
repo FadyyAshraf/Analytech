@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>{{ page_title }}</h1>
+        <div class="sub">
+            الحالة: {{ order.get_status_display }}
+            {% if order.invoice %} | الفاتورة: {{ order.invoice.id }}{% endif %}
+        </div>
+    </div>
+    <div class="quick-links">
+        <a href="{% url 'sales_order_list' %}">رجوع</a>
+
+        {% if order.status == 'Draft' %}
+            <a href="{% url 'sales_order_confirm' order.id %}">اعتماد</a>
+        {% endif %}
+
+        {% if order.status in 'Confirmed,Ready,Partially Released' or order.status == 'Confirmed' or order.status == 'Ready' or order.status == 'Partially Released' %}
+            <a href="{% url 'sales_order_release' order.id %}">إذن صرف</a>
+        {% endif %}
+
+        {% if order.status == 'Released' or order.status == 'Partially Released' %}
+            <a href="{% url 'sales_order_ship' order.id %}">تسجيل شحن/خروج</a>
+        {% endif %}
+
+        {% if order.status == 'Shipped' or order.status == 'Released' or order.status == 'Partially Released' %}
+            <a href="{% url 'sales_order_deliver' order.id %}">تأكيد استلام العميل</a>
+        {% endif %}
+
+        {% if not order.invoice %}
+            <a href="{% url 'create_invoice_from_sales_order' order.id %}">إنشاء فاتورة</a>
+        {% endif %}
+
+        {% if order.status == 'Delivered' %}
+            <a href="{% url 'sales_order_close' order.id %}">إغلاق الطلب</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="section" style="margin-bottom:20px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <h2 style="margin-top:0;">بيانات الطلب</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            {% for field in order_form %}
+            <div {% if field.name == 'delivery_address' or field.name == 'notes' %}style="grid-column:1 / -1;"{% endif %}>
+                <label style="display:block; margin-bottom:6px;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color:red; margin-top:5px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <h2 style="margin-top:20px;">بنود الطلب</h2>
+        {{ formset.management_form }}
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+                <tr>
+                    <th style="padding:10px; border:1px solid #ddd;">الصنف</th>
+                    <th style="padding:10px; border:1px solid #ddd;">التشغيلة</th>
+                    <th style="padding:10px; border:1px solid #ddd;">الوصف</th>
+                    <th style="padding:10px; border:1px solid #ddd;">الكمية المطلوبة</th>
+                    <th style="padding:10px; border:1px solid #ddd;">الكمية المنصرفة</th>
+                    <th style="padding:10px; border:1px solid #ddd;">السعر</th>
+                    <th style="padding:10px; border:1px solid #ddd;">حذف</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.item }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.lot }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.description }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.quantity }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">
+                        {% if form.instance.pk %}{{ form.instance.qty_released }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ form.price }}</td>
+                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">{{ form.DELETE }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if order.status == 'Draft' or order.status == 'Confirmed' %}
+        <button type="submit"
+                style="padding:12px 18px; background:#0f3d56; color:white; border:none; border-radius:8px;">
+            حفظ التعديلات
+        </button>
+        {% endif %}
+    </form>
+</div>
+
+<div class="section">
+    <h2 style="margin-top:0;">ملخص التنفيذ</h2>
+    <div><strong>طريقة السداد:</strong> {{ order.get_payment_terms_display }}</div>
+    <div><strong>طريقة التوصيل:</strong> {{ order.get_delivery_method_display }}</div>
+    <div><strong>الإجمالي:</strong> {{ order.subtotal }}</div>
+    <div><strong>تم الصرف من المخزن:</strong> {% if order.released_at %}{{ order.released_at }}{% else %}-{% endif %}</div>
+    <div><strong>تم الشحن:</strong> {% if order.shipped_at %}{{ order.shipped_at }}{% else %}-{% endif %}</div>
+    <div><strong>تم التسليم:</strong> {% if order.delivered_at %}{{ order.delivered_at }}{% else %}-{% endif %}</div>
+    <div><strong>تأكيد الاستلام:</strong> {% if order.customer_confirmed_receipt %}نعم{% else %}لا{% endif %}</div>
+    <div><strong>رقم التتبع:</strong> {{ order.tracking_number|default:"-" }}</div>
+</div>
+{% endblock %}
