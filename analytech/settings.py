@@ -9,9 +9,17 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'analytech-erp-861216173475.europe-west1.run.app',
+    '.run.app',
     'localhost',
     '127.0.0.1',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://analytech-erp-861216173475.europe-west1.run.app',
+    'https://*.run.app',
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
