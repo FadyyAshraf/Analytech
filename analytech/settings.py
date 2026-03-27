@@ -8,9 +8,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-analytech-clea
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
+    'analytech-erp-861216173475.europe-west1.run.app',
     'localhost',
-    '.run.app',
+    '127.0.0.1',
 ]
 
 INSTALLED_APPS = [
