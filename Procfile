@@ -1,0 +1,1 @@
+web: gunicorn analytech.wsgi:application --bind :$PORT
